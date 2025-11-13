@@ -1,6 +1,6 @@
 package main
 
-import "github.com/MatTwix/Pull-Request-Assigner/services/pr-service/internal/app"
+import "github.com/MatTwix/Pull-Request-Assigner/internal/app"
 
 const configPath = "./configs/config.yml"
 
