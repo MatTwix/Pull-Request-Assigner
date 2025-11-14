@@ -138,8 +138,8 @@ func (r *PullRequestRepo) MergePR(ctx context.Context, prID string) (*models.Pul
 	sql, args, _ := r.Builder.
 		Update("pull_requests").
 		Set("status", "MERGED").
-		Set("merged_at", squirrel.Expr("NOW()")).
-		Where("pull_request_id = ?", prID).
+		Set("merged_at", squirrel.Expr("COALESCE(merged_at, NOW())")).
+		Where(squirrel.Eq{"pull_request_id": prID}).
 		ToSql()
 
 	cmdTag, err := tx.Exec(ctx, sql, args...)
