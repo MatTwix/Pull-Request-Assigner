@@ -39,17 +39,18 @@ func (r *TeamRepo) CreateTeam(ctx context.Context, team models.Team) (*models.Te
 
 	insert := r.Builder.
 		Insert("users").
-		Columns("user_id, username, team_name")
+		Columns("user_id, username, team_name, is_active")
 
 	for _, teamMember := range team.Members {
-		insert = insert.Values(teamMember.UserID, teamMember.Username, team.TeamName)
+		insert = insert.Values(teamMember.UserID, teamMember.Username, team.TeamName, teamMember.IsActive)
 	}
 
 	sql, args, _ = insert.Suffix(`
 		ON CONFLICT (user_id)
 		DO UPDATE SET
 			username = EXCLUDED.username,
-			team_name = EXCLUDED.team_name
+			team_name = EXCLUDED.team_name,
+			is_active = EXCLUDED.is_active
 	`).ToSql()
 
 	if _, err := tx.Exec(ctx, sql, args...); err != nil {
@@ -83,6 +84,7 @@ func (r *TeamRepo) GetTeamByName(ctx context.Context, name string) (*models.Team
 		Select("id, user_id, username, is_active").
 		From("users").
 		Where("team_name = ?", name).
+		OrderBy("id").
 		ToSql()
 
 	rows, err := r.Pool.Query(ctx, sql, args...)
