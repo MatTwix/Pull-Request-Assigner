@@ -217,10 +217,10 @@ func (r *PullRequestRepo) MergePR(ctx context.Context, prID string) (*models.Pul
 	return &pr, nil
 }
 
-func (r *PullRequestRepo) ReassignReviewer(ctx context.Context, prID, oldUserID string) (*models.PullRequest, error) {
+func (r *PullRequestRepo) ReassignReviewer(ctx context.Context, prID, oldUserID string) (pullRequest *models.PullRequest, replacedBy string, err error) {
 	tx, err := r.Pool.Begin(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to start transaction: %w", err)
+		return nil, "", fmt.Errorf("failed to start transaction: %w", err)
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
@@ -233,13 +233,13 @@ func (r *PullRequestRepo) ReassignReviewer(ctx context.Context, prID, oldUserID 
 
 	if err := tx.QueryRow(ctx, sql, args...).Scan(&authorID, &status); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, repoerrs.ErrNotFound
+			return nil, "", repoerrs.ErrNotFound
 		}
-		return nil, fmt.Errorf("failed to get pr: %w", err)
+		return nil, "", fmt.Errorf("failed to get pr: %w", err)
 	}
 
 	if status == MergedStatus {
-		return nil, repoerrs.ErrReassignAfterMerge
+		return nil, "", repoerrs.ErrReassignAfterMerge
 	}
 
 	sql, args, _ = r.Builder.
@@ -251,9 +251,9 @@ func (r *PullRequestRepo) ReassignReviewer(ctx context.Context, prID, oldUserID 
 	var exists int
 	if err := tx.QueryRow(ctx, sql, args...).Scan(&exists); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, repoerrs.ErrNotAssigned
+			return nil, "", repoerrs.ErrNotAssigned
 		}
-		return nil, fmt.Errorf("failed to check reviewer: %w", err)
+		return nil, "", fmt.Errorf("failed to check reviewer: %w", err)
 	}
 
 	var teamName string
@@ -264,7 +264,7 @@ func (r *PullRequestRepo) ReassignReviewer(ctx context.Context, prID, oldUserID 
 		ToSql()
 
 	if err := tx.QueryRow(ctx, sql, args...).Scan(&teamName); err != nil {
-		return nil, fmt.Errorf("failed to get team name: %w", err)
+		return nil, "", fmt.Errorf("failed to get team name: %w", err)
 	}
 
 	sql, args, _ = r.Builder.
@@ -279,9 +279,9 @@ func (r *PullRequestRepo) ReassignReviewer(ctx context.Context, prID, oldUserID 
 	var newReviewerID string
 	if err := tx.QueryRow(ctx, sql, args...).Scan(&newReviewerID); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, repoerrs.ErrNoCandidate
+			return nil, "", repoerrs.ErrNoCandidate
 		}
-		return nil, fmt.Errorf("failed to find new reviewer: %w", err)
+		return nil, "", fmt.Errorf("failed to find new reviewer: %w", err)
 	}
 
 	sql, args, _ = r.Builder.
@@ -291,7 +291,7 @@ func (r *PullRequestRepo) ReassignReviewer(ctx context.Context, prID, oldUserID 
 		ToSql()
 
 	if _, err := tx.Exec(ctx, sql, args...); err != nil {
-		return nil, fmt.Errorf("failed to update reviewer: %w", err)
+		return nil, "", fmt.Errorf("failed to update reviewer: %w", err)
 	}
 
 	pr := models.PullRequest{
@@ -313,7 +313,7 @@ func (r *PullRequestRepo) ReassignReviewer(ctx context.Context, prID, oldUserID 
 	)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to get updated pr: %w", err)
+		return nil, "", fmt.Errorf("failed to get updated pr: %w", err)
 	}
 
 	var otherReviewerID string
@@ -326,7 +326,7 @@ func (r *PullRequestRepo) ReassignReviewer(ctx context.Context, prID, oldUserID 
 
 	err = tx.QueryRow(ctx, sql, args...).Scan(&otherReviewerID)
 	if err != nil && !errors.Is(err, pgx.ErrNoRows) {
-		return nil, fmt.Errorf("failed to get reviewers list: %w", err)
+		return nil, "", fmt.Errorf("failed to get reviewers list: %w", err)
 	}
 
 	pr.AssignedReviewers = append(pr.AssignedReviewers, newReviewerID)
@@ -341,7 +341,7 @@ func (r *PullRequestRepo) ReassignReviewer(ctx context.Context, prID, oldUserID 
 		ToSql()
 
 	if _, err := tx.Exec(ctx, sql, args...); err != nil {
-		return nil, fmt.Errorf("failed to make old reviewer active: %w", err)
+		return nil, "", fmt.Errorf("failed to make old reviewer active: %w", err)
 	}
 
 	sql, args, _ = r.Builder.
@@ -351,12 +351,12 @@ func (r *PullRequestRepo) ReassignReviewer(ctx context.Context, prID, oldUserID 
 		ToSql()
 
 	if _, err := tx.Exec(ctx, sql, args...); err != nil {
-		return nil, fmt.Errorf("failed to make new reviewer inactive: %w", err)
+		return nil, "", fmt.Errorf("failed to make new reviewer inactive: %w", err)
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		return nil, fmt.Errorf("failed to commit reassignment: %w", err)
+		return nil, "", fmt.Errorf("failed to commit reassignment: %w", err)
 	}
 
-	return &pr, nil
+	return &pr, newReviewerID, nil
 }
