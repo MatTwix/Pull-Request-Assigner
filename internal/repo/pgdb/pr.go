@@ -12,6 +12,8 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+const MergedStatus = "MERGED"
+
 type PullRequestRepo struct {
 	*postgres.Postgres
 }
@@ -222,18 +224,22 @@ func (r *PullRequestRepo) ReassignReviewer(ctx context.Context, prID, oldUserID 
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
-	var authorID string
+	var authorID, status string
 	sql, args, _ := r.Builder.
-		Select("author_id").
+		Select("author_id, status").
 		From("pull_requests").
 		Where("pull_request_id = ?", prID).
 		ToSql()
 
-	if err := tx.QueryRow(ctx, sql, args...).Scan(&authorID); err != nil {
+	if err := tx.QueryRow(ctx, sql, args...).Scan(&authorID, &status); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, repoerrs.ErrNotFound
 		}
 		return nil, fmt.Errorf("failed to get pr: %w", err)
+	}
+
+	if status == MergedStatus {
+		return nil, repoerrs.ErrReassignAfterMerge
 	}
 
 	sql, args, _ = r.Builder.
