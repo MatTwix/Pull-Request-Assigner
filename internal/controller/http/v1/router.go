@@ -9,7 +9,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func NewRouter(r *chi.Mux, services *service.Services, logger logger.Logger) http.Handler {
+func NewRouter(r *chi.Mux, services *service.Services, logger logger.Logger) {
 	authMiddleware := &AuthMiddleware{authService: services.Auth, log: logger}
 
 	r.Use(middleware.Recoverer)
@@ -49,6 +49,4 @@ func NewRouter(r *chi.Mux, services *service.Services, logger logger.Logger) htt
 		rt.With(authMiddleware.APIKeyMiddleware(true)).
 			Post("/reassign", pr.reassign)
 	})
-
-	return r
 }
