@@ -20,6 +20,19 @@ func NewTeamRepo(pg *postgres.Postgres) *TeamRepo {
 }
 
 func (r *TeamRepo) CreateTeam(ctx context.Context, team models.Team) (*models.Team, error) {
+	checkSQL, checkArgs, _ := r.Builder.
+		Select("1").
+		From("teams").
+		Where("team_name = ?", team.TeamName).
+		ToSql()
+
+	var exists int
+	if err := r.Pool.QueryRow(ctx, checkSQL, checkArgs...).Scan(&exists); err == nil {
+		return nil, repoerrs.ErrAlreadyExists
+	} else if !errors.Is(err, pgx.ErrNoRows) {
+		return nil, fmt.Errorf("failed to check team existence: %w", err)
+	}
+
 	tx, err := r.Pool.Begin(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start transaction: %w", err)
