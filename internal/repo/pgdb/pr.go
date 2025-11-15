@@ -195,7 +195,7 @@ func (r *PullRequestRepo) MergePR(ctx context.Context, prID string) (*models.Pul
 		AssignedReviewers: reviewerIDs,
 	}
 	sql, args, _ = r.Builder.
-		Select("id", "pull_request_name", "author_id", "status", "merged_at").
+		Select("id", "pull_request_name", "author_id", "status", "merged_at", "created_at").
 		From("pull_requests").
 		Where("pull_request_id = ?", prID).
 		ToSql()
@@ -206,6 +206,7 @@ func (r *PullRequestRepo) MergePR(ctx context.Context, prID string) (*models.Pul
 		&pr.AuthorID,
 		&pr.Status,
 		&pr.MergedAt,
+		&pr.CreatedAt,
 	)
 
 	if err != nil {
@@ -326,7 +327,7 @@ func (r *PullRequestRepo) ReassignReviewer(ctx context.Context, prID, oldUserID 
 	}
 
 	sql, args, _ = r.Builder.
-		Select("id", "pull_request_name", "author_id", "status", "merged_at").
+		Select("id", "pull_request_name", "author_id", "status", "merged_at", "created_at").
 		From("pull_requests").
 		Where("pull_request_id = ?", prID).
 		ToSql()
@@ -337,6 +338,7 @@ func (r *PullRequestRepo) ReassignReviewer(ctx context.Context, prID, oldUserID 
 		&pr.AuthorID,
 		&pr.Status,
 		&pr.MergedAt,
+		&pr.CreatedAt,
 	)
 
 	if err != nil {
