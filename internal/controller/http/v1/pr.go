@@ -53,8 +53,10 @@ func (prr *pullRequestRoutes) create(w http.ResponseWriter, r *http.Request) {
 		switch err {
 		case repoerrs.ErrNotFound:
 			newErrorResponse(w, http.StatusNotFound, CodeNotFound, err.Error())
+			return
 		case repoerrs.ErrAlreadyExists:
 			newErrorResponse(w, http.StatusConflict, CodePRExists, "PR is already exists")
+			return
 		default:
 			newErrorResponse(w, http.StatusInternalServerError, CodeInternalServerError, "failed to create pull request")
 			prr.logger.Error("failed to create pull request", map[string]any{
@@ -128,6 +130,9 @@ func (prr *pullRequestRoutes) reassign(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case repoerrs.ErrNotFound:
+			newErrorResponse(w, http.StatusNotFound, CodeNotFound, "pull request not found")
+			return
+		case repoerrs.ErrUserNotFound:
 			newErrorResponse(w, http.StatusNotFound, CodeNotFound, err.Error())
 			return
 		case repoerrs.ErrReassignAfterMerge:

@@ -93,10 +93,10 @@ func (r *PullRequestRepo) CreatePR(ctx context.Context, pr models.PullRequest) (
 			pr.PullRequestName,
 			pr.AuthorID,
 		).
-		Suffix("RETURNING id, created_at").
+		Suffix("RETURNING id, status, created_at").
 		ToSql()
 
-	if err = tx.QueryRow(ctx, sql, args...).Scan(&pr.ID, &pr.CreatedAt); err != nil {
+	if err = tx.QueryRow(ctx, sql, args...).Scan(&pr.ID, &pr.Status, &pr.CreatedAt); err != nil {
 		return nil, fmt.Errorf("failed to insert pr: %w", err)
 	}
 
@@ -105,7 +105,7 @@ func (r *PullRequestRepo) CreatePR(ctx context.Context, pr models.PullRequest) (
 		Columns("pull_request_id, reviewer_id")
 
 	for _, reviewerID := range pr.AssignedReviewers {
-		insert = insert.Values(pr.ID, reviewerID)
+		insert = insert.Values(pr.PullRequestID, reviewerID)
 	}
 
 	sql, args, _ = r.Builder.
@@ -137,7 +137,21 @@ func (r *PullRequestRepo) MergePR(ctx context.Context, prID string) (*models.Pul
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
+	var prevStatus string
 	sql, args, _ := r.Builder.
+		Select("status").
+		From("pull_requests").
+		Where(squirrel.Eq{"pull_request_id": prID}).
+		ToSql()
+
+	if err := tx.QueryRow(ctx, sql, args...).Scan(&prevStatus); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, repoerrs.ErrNotFound
+		}
+		return nil, fmt.Errorf("failed to check pr status: %w", err)
+	}
+
+	sql, args, _ = r.Builder.
 		Update("pull_requests").
 		Set("status", "MERGED").
 		Set("merged_at", squirrel.Expr("COALESCE(merged_at, NOW())")).
@@ -198,7 +212,7 @@ func (r *PullRequestRepo) MergePR(ctx context.Context, prID string) (*models.Pul
 		return nil, fmt.Errorf("failed to get updated pr: %w", err)
 	}
 
-	if len(reviewerIDs) > 0 {
+	if len(reviewerIDs) > 0 && prevStatus != MergedStatus {
 		sql, args, _ := r.Builder.
 			Update("users").
 			Set("is_active", true).
@@ -244,11 +258,24 @@ func (r *PullRequestRepo) ReassignReviewer(ctx context.Context, prID, oldUserID 
 
 	sql, args, _ = r.Builder.
 		Select("1").
+		From("users").
+		Where("user_id = ?", oldUserID).
+		ToSql()
+
+	var exists int
+	if err := tx.QueryRow(ctx, sql, args...).Scan(&exists); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, "", repoerrs.ErrUserNotFound
+		}
+		return nil, "", fmt.Errorf("failed to check old use existence: %w", err)
+	}
+
+	sql, args, _ = r.Builder.
+		Select("1").
 		From("pull_request_reviewers").
 		Where("pull_request_id = ? AND reviewer_id = ?", prID, oldUserID).
 		ToSql()
 
-	var exists int
 	if err := tx.QueryRow(ctx, sql, args...).Scan(&exists); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, "", repoerrs.ErrNotAssigned
