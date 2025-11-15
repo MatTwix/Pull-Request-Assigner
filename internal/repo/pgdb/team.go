@@ -122,10 +122,6 @@ func (r *TeamRepo) GetTeamByName(ctx context.Context, name string) (*models.Team
 		teamMembers = append(teamMembers, teamMebmer)
 	}
 
-	if len(teamMembers) == 0 {
-		return nil, repoerrs.ErrNotFound
-	}
-
 	team := models.Team{
 		ID:       teamID,
 		TeamName: name,
