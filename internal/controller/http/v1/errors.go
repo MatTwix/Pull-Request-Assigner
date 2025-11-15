@@ -34,7 +34,7 @@ type ErrorResponse struct {
 }
 
 type ErrorBody struct {
-	Code    string `json:"status"`
+	Code    string `json:"code"`
 	Message string `json:"message"`
 }
 

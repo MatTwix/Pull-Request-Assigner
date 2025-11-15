@@ -11,6 +11,7 @@ type Logger interface {
 	Info(msg string, fields ...map[string]any)
 	Warn(msg string, fields ...map[string]any)
 	Error(msg string, fields ...map[string]any)
+	Fatal(msg string, fields ...map[string]any)
 }
 
 const (
@@ -50,6 +51,15 @@ func (l *logrusLogger) Error(msg string, fields ...map[string]any) {
 	} else {
 		l.entry.Error(msg)
 	}
+}
+
+func (l *logrusLogger) Fatal(msg string, fields ...map[string]any) {
+	if len(fields) > 0 {
+		l.entry.WithFields(fields[0]).Error(msg)
+	} else {
+		l.entry.Error(msg)
+	}
+	os.Exit(1)
 }
 
 func NewLogger(env string) Logger {
