@@ -1,0 +1,96 @@
+services:
+  pr-service:
+    build: 
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: pr-service
+    restart: on-failure
+    environment:
+      AUTH_ADMIN_API_KEY: ${ADMIN_API_KEY}
+      AUTH_USER_API_KEY: ${USER_API_KEY}
+      POSTGRES_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DBNAME}
+    ports:
+      - "${APP_PORT}:8080"
+    depends_on:
+      - postgres
+    networks:
+      - avito-task-network
+  postgres:
+    image: postgres:14-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DBNAME}
+    ports: 
+      - "${POSTGRES_EXTERNAL_PORT}:5432"
+    restart: always
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DBNAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - avito-task-network
+  # prometheus:
+  #   image: prom/prometheus:v2.47.0
+  #   container_name: prometheus
+  #   ports: 
+  #     - "${PROMETHEUS_PORT}:9090"
+  #   volumes:
+  #     - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+  #     - prometheus-data:/prometheus
+  #   restart: on-failure
+  #   command:
+  #     - '--config.file=/etc/prometheus/prometheus.yml'
+  #   networks:
+  #     - avito-task-network
+  # grafana:
+  #   image: grafana/grafana:10.1.5
+  #   container_name: grafana
+  #   ports:
+  #     - "${GRAFANA_PORT}:3000"
+  #   environment:
+  #     - POSTGRES_USER=${POSTGRES_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  #     - POSTGRES_DBNAME=${POSTGRES_DBNAME}
+  #   restart: on-failure
+  #   volumes:
+  #     - ./monitoring/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+  #     - ./monitoring/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+  #     - ./monitoring/grafana-dashboards:/etc/grafana/dashboards
+  #     - grafana-data:/var/lib/grafana
+  #   depends_on:
+  #     - prometheus
+  #     - postgres
+  #   networks:
+  #     - avito-task-network
+  # loki:
+  #   image: grafana/loki:2.9.0
+  #   container_name: loki
+  #   ports:
+  #     - "${LOKI_PORT}:3100"
+  #   volumes:
+  #     - ./monitoring/loki-config.yml:/etc/loki/local-config.yml
+  #   command: -config.file=/etc/loki/local-config.yml
+  #   networks:
+  #     - avito-task-network
+  # promtail:
+  #   image: grafana/promtail:2.9.0
+  #   container_name: promtail
+  #   volumes:
+  #     - ./monitoring/promtail-config.yml:/etc/promtail/config.yml
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   command: -config.file=/etc/promtail/config.yml
+  #   networks:
+  #     - avito-task-network
+volumes:
+  postgres-data:
+  # prometheus-data:
+  # grafana-data:
+
+networks:
+  avito-task-network:
+    driver: bridge
