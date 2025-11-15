@@ -30,6 +30,20 @@ type createPRRequest struct {
 	AuthorID        string `json:"author_id" validate:"required"`
 }
 
+// @Summary Создать пулл реквест
+// @Description Создает пулл реквест и автоматически назначает до 2 ревьюверов из команды автора
+// @Tags PullRequests
+// @Accept json
+// @Produce json
+// @Param request body createPRRequest true "PullRequest payload"
+// @Success 201 {object} service.PullRequestCreateOutput
+// @Failure 400 {object} ErrorResponse "Неверное тело запроса"
+// @Failure 401 {object} ErrorResponse "Ошибка авторизации"
+// @Failure 404 {object} ErrorResponse "Автор/команда не найдены"
+// @Failure 409 {object} ErrorResponse "PR уже существует"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
+// @Security ApiKeyAuth
+// @Router /pullRequest/create [post]
 func (prr *pullRequestRoutes) create(w http.ResponseWriter, r *http.Request) {
 	var req createPRRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -76,6 +90,19 @@ type mergePRRequest struct {
 	PullRequestID string `json:"pull_request_id" validate:"required"`
 }
 
+// @Summary Установить статус пулл реквеста "MERGED"
+// @Description Идемпотентно устанавливает статус пулл реквеста "MERGED"
+// @Tags PullRequests
+// @Accept json
+// @Produce json
+// @Param request body mergePRRequest true "Merge payload"
+// @Success 200 {object} service.PullRequestMergeOutput
+// @Failure 400 {object} ErrorResponse "Неверное тело запроса"
+// @Failure 401 {object} ErrorResponse "Ошибка авторизации"
+// @Failure 404 {object} ErrorResponse "PR не найден"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
+// @Security ApiKeyAuth
+// @Router /pullRequest/merge [post]
 func (prr *pullRequestRoutes) merge(w http.ResponseWriter, r *http.Request) {
 	var req mergePRRequest
 
@@ -113,6 +140,20 @@ type reassignRequest struct {
 	OldUserID     string `json:"old_user_id"`
 }
 
+// @Summary Переназначить ревьювера
+// @Description Меняет одного ревьювера на рандомного из его команды
+// @Tags PullRequests
+// @Accept json
+// @Produce json
+// @Param request body reassignRequest true "Reassign payload"
+// @Success 200 {object} service.PullRequestReassignOutput
+// @Failure 400 {object} ErrorResponse "Неверное тело запроса"
+// @Failure 401 {object} ErrorResponse "Ошибка авторизации"
+// @Failure 404 {object} ErrorResponse "PR или пользователь не найден"
+// @Failure 409 {object} ErrorResponse "Нарушение правил переназначения"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
+// @Security ApiKeyAuth
+// @Router /pullRequest/reassign [post]
 func (prr *pullRequestRoutes) reassign(w http.ResponseWriter, r *http.Request) {
 	var req reassignRequest
 

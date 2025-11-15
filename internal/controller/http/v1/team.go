@@ -35,6 +35,18 @@ type teamMember struct {
 	IsActive bool   `json:"is_active" validate:"required"`
 }
 
+// @Summary Создать команду с участниками
+// @Description Создает или обновляет команду с указанными пользователями
+// @Tags Teams
+// @Accept json
+// @Produce json
+// @Param request body addTeamRequest true "Team payload"
+// @Success 201 {object} service.TeamAddOutput
+// @Failure 400 {object} ErrorResponse "Команда уже существует или неверное тело запроса"
+// @Failure 401 {object} ErrorResponse "Ошибка авторизации"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
+// @Security ApiKeyAuth
+// @Router /team/add [post]
 func (tr *teamRoutes) add(w http.ResponseWriter, r *http.Request) {
 	var req addTeamRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -77,6 +89,18 @@ func (tr *teamRoutes) add(w http.ResponseWriter, r *http.Request) {
 	newSuccessResponse(w, http.StatusCreated, team)
 }
 
+// @Summary Получить команду с участниками
+// @Description Возвращает информацию о команде и ее пользователях
+// @Tags Teams
+// @Accept json
+// @Produce json
+// @Param team_name query string true "Имя команды"
+// @Success 200 {object} service.TeamGetOutput
+// @Failure 400 {object} ErrorResponse "Неверное имя команды"
+// @Failure 401 {object} ErrorResponse "Ошибка авторизации"
+// @Failure 404 {object} ErrorResponse "Команда не найдена"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
+// @Router /team/get [get]
 func (tr *teamRoutes) get(w http.ResponseWriter, r *http.Request) {
 	teamName := r.URL.Query().Get("team_name")
 	if teamName == "" {

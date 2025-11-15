@@ -29,6 +29,19 @@ type setIsActiveRequest struct {
 	IsActive bool   `json:"is_active"`
 }
 
+// @Summary Установить is_active флаг пользователя
+// @Description Позволяет активировать и деактивировать пользователя
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param request body setIsActiveRequest true "User payload"
+// @Success 200 {object} service.UserSetIsActiveOutput
+// @Failure 400 {object} ErrorResponse "Неверное тело запроса"
+// @Failure 401 {object} ErrorResponse "Ошибка авторизации"
+// @Failure 404 {object} ErrorResponse "Пользователь не найден"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
+// @Security ApiKeyAuth
+// @Router /users/setIsActive [post]
 func (ur *userRoutes) setIsActive(w http.ResponseWriter, r *http.Request) {
 	var req setIsActiveRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -61,6 +74,18 @@ func (ur *userRoutes) setIsActive(w http.ResponseWriter, r *http.Request) {
 	newSuccessResponse(w, http.StatusOK, user)
 }
 
+// @Summary Получить пулл реквесты, в которых пользователь является ревьювером
+// @Description Возвращает список пулл реквестов, назначенных пользователю
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param user_id query string true "user_id пользователя"
+// @Success 200 {object} service.UserGetReviewOutput
+// @Failure 400 {object} ErrorResponse "Неверный user_id"
+// @Failure 401 {object} ErrorResponse "Ошибка авторизации"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
+// @Security ApiKeyAuth
+// @Router /users/getReview [get]
 func (ur *userRoutes) getReview(w http.ResponseWriter, r *http.Request) {
 	userID := r.URL.Query().Get("user_id")
 	if userID == "" {

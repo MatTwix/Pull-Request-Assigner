@@ -1,0 +1,502 @@
+basePath: /
+definitions:
+  github_com_MatTwix_Pull-Request-Assigner_internal_service.PullRequestCreateOutput:
+    properties:
+      pr:
+        $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.PullRequestCreateOutputPR'
+    type: object
+  github_com_MatTwix_Pull-Request-Assigner_internal_service.PullRequestCreateOutputPR:
+    properties:
+      assigned_reviewers:
+        items:
+          type: string
+        type: array
+      author_id:
+        type: string
+      created_at:
+        type: string
+      pull_request_id:
+        type: string
+      pull_request_name:
+        type: string
+      status:
+        type: string
+    type: object
+  github_com_MatTwix_Pull-Request-Assigner_internal_service.PullRequestMergeOutput:
+    properties:
+      pr:
+        $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.PullRequestMergeOutputPR'
+    type: object
+  github_com_MatTwix_Pull-Request-Assigner_internal_service.PullRequestMergeOutputPR:
+    properties:
+      assigned_reviewers:
+        items:
+          type: string
+        type: array
+      author_id:
+        type: string
+      mergedAt:
+        type: string
+      pull_request_id:
+        type: string
+      pull_request_name:
+        type: string
+      status:
+        type: string
+    type: object
+  github_com_MatTwix_Pull-Request-Assigner_internal_service.PullRequestReassignOutput:
+    properties:
+      pr:
+        $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.PullRequestReassignOutputPR'
+      replaced_by:
+        type: string
+    type: object
+  github_com_MatTwix_Pull-Request-Assigner_internal_service.PullRequestReassignOutputPR:
+    properties:
+      assigned_reviewers:
+        items:
+          type: string
+        type: array
+      author_id:
+        type: string
+      pull_request_id:
+        type: string
+      pull_request_name:
+        type: string
+      status:
+        type: string
+    type: object
+  github_com_MatTwix_Pull-Request-Assigner_internal_service.TeamAddOutput:
+    properties:
+      team:
+        $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.TeamAddOutputTeam'
+    type: object
+  github_com_MatTwix_Pull-Request-Assigner_internal_service.TeamAddOutputTeam:
+    properties:
+      members:
+        items:
+          $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.TeamOutputMember'
+        type: array
+      team_name:
+        type: string
+    type: object
+  github_com_MatTwix_Pull-Request-Assigner_internal_service.TeamGetOutput:
+    properties:
+      members:
+        items:
+          $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.TeamOutputMember'
+        type: array
+      team_name:
+        type: string
+    type: object
+  github_com_MatTwix_Pull-Request-Assigner_internal_service.TeamOutputMember:
+    properties:
+      is_active:
+        type: boolean
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
+  github_com_MatTwix_Pull-Request-Assigner_internal_service.UserGetReviewOutput:
+    properties:
+      pull_requests:
+        items:
+          $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.UserRevieeOutputPR'
+        type: array
+      user_id:
+        type: string
+    type: object
+  github_com_MatTwix_Pull-Request-Assigner_internal_service.UserRevieeOutputPR:
+    properties:
+      author_id:
+        type: string
+      pull_request_id:
+        type: string
+      pull_request_name:
+        type: string
+      status:
+        type: string
+    type: object
+  github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveOutput:
+    properties:
+      user:
+        $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveOutputUser'
+    type: object
+  github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveOutputUser:
+    properties:
+      is_active:
+        type: boolean
+      team_name:
+        type: string
+      user_id:
+        type: string
+      username:
+        type: string
+    type: object
+  internal_controller_http_v1.ErrorBody:
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+    type: object
+  internal_controller_http_v1.ErrorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/internal_controller_http_v1.ErrorBody'
+    type: object
+  internal_controller_http_v1.addTeamRequest:
+    properties:
+      members:
+        items:
+          $ref: '#/definitions/internal_controller_http_v1.teamMember'
+        type: array
+      team_name:
+        type: string
+    required:
+    - members
+    - team_name
+    type: object
+  internal_controller_http_v1.createPRRequest:
+    properties:
+      author_id:
+        type: string
+      pull_request_id:
+        type: string
+      pull_request_name:
+        type: string
+    required:
+    - author_id
+    - pull_request_id
+    - pull_request_name
+    type: object
+  internal_controller_http_v1.mergePRRequest:
+    properties:
+      pull_request_id:
+        type: string
+    required:
+    - pull_request_id
+    type: object
+  internal_controller_http_v1.reassignRequest:
+    properties:
+      old_user_id:
+        type: string
+      pull_request_id:
+        type: string
+    type: object
+  internal_controller_http_v1.setIsActiveRequest:
+    properties:
+      is_active:
+        type: boolean
+      user_id:
+        type: string
+    required:
+    - user_id
+    type: object
+  internal_controller_http_v1.teamMember:
+    properties:
+      is_active:
+        type: boolean
+      user_id:
+        type: string
+      username:
+        type: string
+    required:
+    - is_active
+    - user_id
+    - username
+    type: object
+host: localhost:8080
+info:
+  contact:
+    name: Матвей Федоров
+  description: Сервис для автоматического назначения ревьюверов на Pull Request'ы,
+    управления командами и пользователями.
+  title: Pull Request Assigner Service
+  version: "1.0"
+paths:
+  /pullRequest/create:
+    post:
+      consumes:
+      - application/json
+      description: Создает пулл реквест и автоматически назначает до 2 ревьюверов
+        из команды автора
+      parameters:
+      - description: PullRequest payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_controller_http_v1.createPRRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.PullRequestCreateOutput'
+        "400":
+          description: Неверное тело запроса
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "401":
+          description: Ошибка авторизации
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "404":
+          description: Автор/команда не найдены
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "409":
+          description: PR уже существует
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Создать пулл реквест
+      tags:
+      - PullRequests
+  /pullRequest/merge:
+    post:
+      consumes:
+      - application/json
+      description: Идемпотентно устанавливает статус пулл реквеста "MERGED"
+      parameters:
+      - description: Merge payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_controller_http_v1.mergePRRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.PullRequestMergeOutput'
+        "400":
+          description: Неверное тело запроса
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "401":
+          description: Ошибка авторизации
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "404":
+          description: PR не найден
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Установить статус пулл реквеста "MERGED"
+      tags:
+      - PullRequests
+  /pullRequest/reassign:
+    post:
+      consumes:
+      - application/json
+      description: Меняет одного ревьювера на рандомного из его команды
+      parameters:
+      - description: Reassign payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_controller_http_v1.reassignRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.PullRequestReassignOutput'
+        "400":
+          description: Неверное тело запроса
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "401":
+          description: Ошибка авторизации
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "404":
+          description: PR или пользователь не найден
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "409":
+          description: Нарушение правил переназначения
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Переназначить ревьювера
+      tags:
+      - PullRequests
+  /team/add:
+    post:
+      consumes:
+      - application/json
+      description: Создает или обновляет команду с указанными пользователями
+      parameters:
+      - description: Team payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_controller_http_v1.addTeamRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.TeamAddOutput'
+        "400":
+          description: Команда уже существует или неверное тело запроса
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "401":
+          description: Ошибка авторизации
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Создать команду с участниками
+      tags:
+      - Teams
+  /team/get:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию о команде и ее пользователях
+      parameters:
+      - description: Имя команды
+        in: query
+        name: team_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.TeamGetOutput'
+        "400":
+          description: Неверное имя команды
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "401":
+          description: Ошибка авторизации
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "404":
+          description: Команда не найдена
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+      summary: Получить команду с участниками
+      tags:
+      - Teams
+  /users/getReview:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список пулл реквестов, назначенных пользователю
+      parameters:
+      - description: user_id пользователя
+        in: query
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.UserGetReviewOutput'
+        "400":
+          description: Неверный user_id
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "401":
+          description: Ошибка авторизации
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Получить пулл реквесты, в которых пользователь является ревьювером
+      tags:
+      - Users
+  /users/setIsActive:
+    post:
+      consumes:
+      - application/json
+      description: Позволяет активировать и деактивировать пользователя
+      parameters:
+      - description: User payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_controller_http_v1.setIsActiveRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveOutput'
+        "400":
+          description: Неверное тело запроса
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "401":
+          description: Ошибка авторизации
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Установить is_active флаг пользователя
+      tags:
+      - Users
+securityDefinitions:
+  ApiKeyAuth:
+    description: API key required for accessing protected endpoints
+    in: header
+    name: X-Api-Key
+    type: apiKey
+swagger: "2.0"

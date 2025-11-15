@@ -17,6 +17,21 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// @title           Pull Request Assigner Service
+// @version         1.0
+// @description     Сервис для автоматического назначения ревьюверов на Pull Request'ы, управления командами и пользователями.
+
+// @contact.name   Матвей Федоров
+// @contact.tg @mattwix
+// @contact.emal mfgolden@yandex.ru
+
+// @host      localhost:8080
+// @BasePath  /
+
+// @securityDefinitions.apikey  ApiKeyAuth
+// @in                          header
+// @name                        X-Api-Key
+// @description                 API key required for accessing protected endpoints
 func Run(configPath string) {
 	// Configuration
 	cfg, err := config.NewConfig(configPath)

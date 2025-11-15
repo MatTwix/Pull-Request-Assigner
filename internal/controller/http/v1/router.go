@@ -3,10 +3,13 @@ package v1
 import (
 	"net/http"
 
+	_ "github.com/MatTwix/Pull-Request-Assigner/docs"
+
 	"github.com/MatTwix/Pull-Request-Assigner/internal/service"
 	"github.com/MatTwix/Pull-Request-Assigner/pkg/logger"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func NewRouter(r *chi.Mux, services *service.Services, logger logger.Logger) {
@@ -18,6 +21,8 @@ func NewRouter(r *chi.Mux, services *service.Services, logger logger.Logger) {
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
+
+	r.Get("/swagger/*", httpSwagger.WrapHandler)
 
 	r.Route("/team", func(rt chi.Router) {
 		team := newTeamRoutes(services.Team, logger)
