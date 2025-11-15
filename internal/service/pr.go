@@ -53,7 +53,6 @@ func (s *PullRequestService) MergePR(ctx context.Context, prID string) (*PullReq
 		AuthorID:          pullRequest.AuthorID,
 		Status:            pullRequest.Status,
 		AssignedReviewers: pullRequest.AssignedReviewers,
-		CreatedAt:         pullRequest.CreatedAt,
 		MergedAt:          *pullRequest.MergedAt,
 	}
 
@@ -76,7 +75,6 @@ func (s *PullRequestService) ReassignReviewer(ctx context.Context, prID, oldUser
 			AuthorID:          pullRequest.AuthorID,
 			Status:            pullRequest.Status,
 			AssignedReviewers: pullRequest.AssignedReviewers,
-			CreatedAt:         pullRequest.CreatedAt,
 		},
 	}
 
