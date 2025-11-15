@@ -7,6 +7,11 @@ import (
 	"github.com/MatTwix/Pull-Request-Assigner/internal/repo"
 )
 
+type Auth interface {
+	IsUserKey(key string) bool
+	IsAdminKey(key string) bool
+}
+
 type TeamAddInput struct {
 	TeamName string
 	Members  []TeamInputMember
@@ -125,6 +130,7 @@ type PullRequest interface {
 }
 
 type Services struct {
+	Auth        Auth
 	Team        Team
 	User        User
 	PullRequest PullRequest
@@ -132,10 +138,14 @@ type Services struct {
 
 type ServicesDependencies struct {
 	Repos *repo.Repositories
+
+	AdminAPIKey string
+	UserAPIKey  string
 }
 
 func NewServices(deps ServicesDependencies) *Services {
 	return &Services{
+		Auth:        NewAuthService(deps.UserAPIKey, deps.AdminAPIKey),
 		User:        NewUserService(deps.Repos.User),
 		Team:        NewTeamService(deps.Repos.Team),
 		PullRequest: NewPullRequestService(deps.Repos.PullRequest),
