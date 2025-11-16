@@ -62,6 +62,10 @@ func (r *PullRequestRepo) CreatePR(ctx context.Context, pr models.PullRequest) (
 		pr.AssignedReviewers = append(pr.AssignedReviewers, reviewerID)
 	}
 
+	if len(pr.AssignedReviewers) < 2 {
+		pr.NeedsMoreReviewers = true
+	}
+
 	checkSQL, checkArgs, _ := r.Builder.
 		Select("1").
 		From("pull_requests").
@@ -83,11 +87,12 @@ func (r *PullRequestRepo) CreatePR(ctx context.Context, pr models.PullRequest) (
 
 	sql, args, _ = r.Builder.
 		Insert("pull_requests").
-		Columns("pull_request_id, pull_request_name, author_id").
+		Columns("pull_request_id, pull_request_name, author_id, needs_more_reviewers").
 		Values(
 			pr.PullRequestID,
 			pr.PullRequestName,
 			pr.AuthorID,
+			pr.NeedsMoreReviewers,
 		).
 		Suffix("RETURNING id, status, created_at").
 		ToSql()
@@ -154,6 +159,7 @@ func (r *PullRequestRepo) MergePR(ctx context.Context, prID string) (prRes *mode
 			Update("pull_requests").
 			Set("status", "MERGED").
 			Set("merged_at", squirrel.Expr("NOW()")).
+			Set("needs_more_reviewers", false).
 			Where(squirrel.Eq{"pull_request_id": prID}).
 			ToSql()
 

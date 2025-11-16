@@ -17,6 +17,7 @@ CREATE TABLE pull_requests (
     pull_request_name TEXT NOT NULL,
     author_id TEXT REFERENCES users(user_id) ON DELETE CASCADE,
     status TEXT CHECK(status IN ('OPEN', 'MERGED')) NOT NULL DEFAULT 'OPEN',
+    needs_more_reviewers BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT NOW(),
     merged_at TIMESTAMP NULL
 );
