@@ -98,16 +98,21 @@ definitions:
       username:
         type: string
     type: object
+  github_com_MatTwix_Pull-Request-Assigner_internal_service.TeamSetIsActiveTeamOutput:
+    properties:
+      users_updated:
+        type: integer
+    type: object
   github_com_MatTwix_Pull-Request-Assigner_internal_service.UserGetReviewOutput:
     properties:
       pull_requests:
         items:
-          $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.UserRevieeOutputPR'
+          $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.UserReviewOutputPR'
         type: array
       user_id:
         type: string
     type: object
-  github_com_MatTwix_Pull-Request-Assigner_internal_service.UserRevieeOutputPR:
+  github_com_MatTwix_Pull-Request-Assigner_internal_service.UserReviewOutputPR:
     properties:
       author_id:
         type: string
@@ -133,11 +138,6 @@ definitions:
         type: string
       username:
         type: string
-    type: object
-  github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveTeamOutput:
-    properties:
-      users_updated:
-        type: integer
     type: object
   internal_controller_http_v1.ErrorBody:
     properties:
@@ -430,7 +430,7 @@ paths:
       summary: Получить команду с участниками
       tags:
       - Teams
-  /users/deactivateTeam:
+  /teams/deactivate:
     post:
       consumes:
       - application/json
@@ -448,7 +448,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveTeamOutput'
+            $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.TeamSetIsActiveTeamOutput'
         "400":
           description: Неверное тело запроса
           schema:
@@ -463,7 +463,7 @@ paths:
             $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
       summary: Деактивация всех членов команды
       tags:
-      - Users
+      - Teams
   /users/getReview:
     get:
       consumes:

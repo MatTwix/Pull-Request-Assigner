@@ -43,9 +43,14 @@ type TeamOutputMember struct {
 	IsActive bool   `json:"is_active"`
 }
 
+type TeamSetIsActiveTeamOutput struct {
+	UsersUpdated int64 `json:"users_updated"`
+}
+
 type Team interface {
 	AddTeam(ctx context.Context, input TeamAddInput) (*TeamAddOutput, error)
 	GetTeamByName(ctx context.Context, name string) (*TeamGetOutput, error)
+	SetIsActiveTeam(ctx context.Context, teamName string, isActive bool) (*TeamSetIsActiveTeamOutput, error)
 }
 
 type UserSetIsActiveOutput struct {
@@ -61,24 +66,19 @@ type UserSetIsActiveOutputUser struct {
 
 type UserGetReviewOutput struct {
 	UserID       string               `json:"user_id"`
-	PullRequests []UserRevieeOutputPR `json:"pull_requests"`
+	PullRequests []UserReviewOutputPR `json:"pull_requests"`
 }
 
-type UserRevieeOutputPR struct {
+type UserReviewOutputPR struct {
 	PullRequestID   string `json:"pull_request_id"`
 	PullRequestName string `json:"pull_request_name"`
 	AuthorID        string `json:"author_id"`
 	Status          string `json:"status"`
 }
 
-type UserSetIsActiveTeamOutput struct {
-	UsersUpdated int64 `json:"users_updated"`
-}
-
 type User interface {
 	SetIsActive(ctx context.Context, userID string, isActive bool) (*UserSetIsActiveOutput, error)
 	GetReview(ctx context.Context, userID string) (*UserGetReviewOutput, error)
-	SetIsActiveTeam(ctx context.Context, teamName string, isActive bool) (*UserSetIsActiveTeamOutput, error)
 }
 
 type PullRequestCreateInput struct {

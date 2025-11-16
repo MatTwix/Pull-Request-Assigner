@@ -70,3 +70,15 @@ func (s *TeamService) GetTeamByName(ctx context.Context, name string) (*TeamGetO
 
 	return &output, nil
 }
+
+func (s *TeamService) SetIsActiveTeam(ctx context.Context, teamName string, isActive bool) (*TeamSetIsActiveTeamOutput, error) {
+	usersUpdated, err := s.teamRepo.SetIsActiveTeam(ctx, teamName, isActive)
+	if err != nil {
+		return nil, err
+	}
+
+	output := TeamSetIsActiveTeamOutput{UsersUpdated: usersUpdated}
+
+	metrics.UserStatusChanges.WithLabelValues("setIsActiveTeam").Add(float64(usersUpdated))
+	return &output, nil
+}

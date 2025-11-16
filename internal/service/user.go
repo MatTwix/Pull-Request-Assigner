@@ -45,7 +45,7 @@ func (s *UserService) GetReview(ctx context.Context, userID string) (*UserGetRev
 
 	output := UserGetReviewOutput{UserID: userID}
 	for _, repository := range repositories {
-		output.PullRequests = append(output.PullRequests, UserRevieeOutputPR{
+		output.PullRequests = append(output.PullRequests, UserReviewOutputPR{
 			PullRequestID:   repository.PullRequestID,
 			PullRequestName: repository.PullRequestName,
 			AuthorID:        repository.AuthorID,
@@ -53,17 +53,5 @@ func (s *UserService) GetReview(ctx context.Context, userID string) (*UserGetRev
 		})
 	}
 
-	return &output, nil
-}
-
-func (s *UserService) SetIsActiveTeam(ctx context.Context, teamName string, isActive bool) (*UserSetIsActiveTeamOutput, error) {
-	usersUpdated, err := s.userRepo.SetIsActiveTeam(ctx, teamName, isActive)
-	if err != nil {
-		return nil, err
-	}
-
-	output := UserSetIsActiveTeamOutput{UsersUpdated: usersUpdated}
-
-	metrics.UserStatusChanges.WithLabelValues("setIsActiveTeam").Add(float64(usersUpdated))
 	return &output, nil
 }

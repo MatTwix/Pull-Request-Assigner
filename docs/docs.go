@@ -331,7 +331,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/deactivateTeam": {
+        "/teams/deactivate": {
             "post": {
                 "description": "Быстрый метод для массовой деактивации членов определенной команды",
                 "consumes": [
@@ -341,7 +341,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "Teams"
                 ],
                 "summary": "Деактивация всех членов команды",
                 "parameters": [
@@ -359,7 +359,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveTeamOutput"
+                            "$ref": "#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.TeamSetIsActiveTeamOutput"
                         }
                     },
                     "400": {
@@ -655,13 +655,21 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_MatTwix_Pull-Request-Assigner_internal_service.TeamSetIsActiveTeamOutput": {
+            "type": "object",
+            "properties": {
+                "users_updated": {
+                    "type": "integer"
+                }
+            }
+        },
         "github_com_MatTwix_Pull-Request-Assigner_internal_service.UserGetReviewOutput": {
             "type": "object",
             "properties": {
                 "pull_requests": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.UserRevieeOutputPR"
+                        "$ref": "#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.UserReviewOutputPR"
                     }
                 },
                 "user_id": {
@@ -669,7 +677,7 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_MatTwix_Pull-Request-Assigner_internal_service.UserRevieeOutputPR": {
+        "github_com_MatTwix_Pull-Request-Assigner_internal_service.UserReviewOutputPR": {
             "type": "object",
             "properties": {
                 "author_id": {
@@ -708,14 +716,6 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
-                }
-            }
-        },
-        "github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveTeamOutput": {
-            "type": "object",
-            "properties": {
-                "users_updated": {
-                    "type": "integer"
                 }
             }
         },

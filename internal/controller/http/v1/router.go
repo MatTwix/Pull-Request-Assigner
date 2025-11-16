@@ -34,6 +34,9 @@ func NewRouter(r *chi.Mux, services *service.Services, logger logger.Logger) {
 
 		rt.With(authMiddleware.APIKeyMiddleware(true)).
 			Get("/get", team.get)
+
+		rt.With(authMiddleware.APIKeyMiddleware(true)).
+			Post("/deactivate", team.deactivateTeam)
 	})
 
 	r.Route("/users", func(rt chi.Router) {
@@ -44,9 +47,6 @@ func NewRouter(r *chi.Mux, services *service.Services, logger logger.Logger) {
 
 		rt.With(authMiddleware.APIKeyMiddleware(false)).
 			Get("/getReview", user.getReview)
-
-		rt.With(authMiddleware.APIKeyMiddleware(true)).
-			Post("/deactivateTeam", user.deactivateTeam)
 	})
 
 	r.Route("/pullRequest", func(rt chi.Router) {

@@ -126,3 +126,50 @@ func (tr *teamRoutes) get(w http.ResponseWriter, r *http.Request) {
 
 	newSuccessResponse(w, http.StatusOK, team)
 }
+
+type deactivateTeamRequest struct {
+	TeamName string `json:"team_name" validate:"required"`
+}
+
+// @Summary Деактивация всех членов команды
+// @Description Быстрый метод для массовой деактивации членов определенной команды
+// @Tags Teams
+// @Accept json
+// @Produce json
+// @Param request body deactivateTeamRequest true "Team to deactivate name"
+// @Success 200 {object} service.TeamSetIsActiveTeamOutput
+// @Failure 400 {object} ErrorResponse "Неверное тело запроса"
+// @Failure 404 {object} ErrorResponse "Команда не найдена"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
+// @Router /teams/deactivate [post]
+func (tr *teamRoutes) deactivateTeam(w http.ResponseWriter, r *http.Request) {
+	var req deactivateTeamRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		newErrorResponse(w, http.StatusBadRequest, CodeBadRequest, "invalid request body")
+		return
+	}
+
+	if err := utils.ValidateStruct(req); err != nil || req.TeamName == "" {
+		newErrorResponse(w, http.StatusBadRequest, CodeBadRequest, "invalid request body")
+		return
+	}
+
+	usersDeactivated, err := tr.teamService.SetIsActiveTeam(r.Context(), req.TeamName, false)
+	if err != nil {
+		switch err {
+		case repoerrs.ErrNotFound:
+			newErrorResponse(w, http.StatusNotFound, CodeNotFound, err.Error())
+			return
+		default:
+			newErrorResponse(w, http.StatusInternalServerError, CodeInternalServerError, "failed to deactivate users")
+			tr.logger.Error("failed to deactivate users", map[string]any{
+				"team_name": len(req.TeamName),
+				"error":     err,
+			})
+			return
+		}
+	}
+
+	newSuccessResponse(w, http.StatusOK, usersDeactivated)
+}

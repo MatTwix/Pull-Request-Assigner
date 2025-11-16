@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/Masterminds/squirrel"
 	"github.com/MatTwix/Pull-Request-Assigner/internal/models"
 	"github.com/MatTwix/Pull-Request-Assigner/internal/repo/repoerrs"
 	"github.com/MatTwix/Pull-Request-Assigner/pkg/database/postgres"
@@ -141,34 +140,4 @@ func (r *UserRepo) GetReviewPRsByUserID(ctx context.Context, userID string) ([]m
 	}
 
 	return pullRequests, nil
-}
-
-func (r *UserRepo) SetIsActiveTeam(ctx context.Context, teamName string, active bool) (int64, error) {
-	checkSQL, checkArgs, _ := r.Builder.
-		Select("1").
-		From("teams").
-		Where("team_name = ?", teamName).
-		ToSql()
-
-	var exists int
-	if err := r.Pool.QueryRow(ctx, checkSQL, checkArgs...).Scan(&exists); err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return 0, repoerrs.ErrNotFound
-		}
-		return 0, fmt.Errorf("failed to check team existence: %w", err)
-	}
-
-	sql, args, _ := r.Builder.
-		Update("users").
-		Set("is_active", active).
-		Where(squirrel.Eq{"team_name": teamName}).
-		Where("is_active != ?", active).
-		ToSql()
-
-	cmd, err := r.Pool.Exec(ctx, sql, args...)
-	if err != nil {
-		return 0, fmt.Errorf("failed to send batch: %w", err)
-	}
-
-	return cmd.RowsAffected(), nil
 }

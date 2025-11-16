@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/MatTwix/Pull-Request-Assigner/internal/models"
 	"github.com/MatTwix/Pull-Request-Assigner/internal/repo/repoerrs"
 	"github.com/MatTwix/Pull-Request-Assigner/pkg/database/postgres"
@@ -49,6 +50,16 @@ func (r *TeamRepo) CreateTeam(ctx context.Context, team models.Team) (*models.Te
 	if err := tx.QueryRow(ctx, sql, args...).Scan(&team.ID); err != nil {
 		return nil, fmt.Errorf("failed to insert team: %w", err)
 	}
+
+	seen := map[string]struct{}{}
+	uniqueMembers := []models.User{}
+	for _, m := range team.Members {
+		if _, ok := seen[m.UserID]; !ok {
+			uniqueMembers = append(uniqueMembers, m)
+			seen[m.UserID] = struct{}{}
+		}
+	}
+	team.Members = uniqueMembers
 
 	insert := r.Builder.
 		Insert("users").
@@ -129,4 +140,34 @@ func (r *TeamRepo) GetTeamByName(ctx context.Context, name string) (*models.Team
 	}
 
 	return &team, nil
+}
+
+func (r *TeamRepo) SetIsActiveTeam(ctx context.Context, teamName string, active bool) (int64, error) {
+	checkSQL, checkArgs, _ := r.Builder.
+		Select("1").
+		From("teams").
+		Where("team_name = ?", teamName).
+		ToSql()
+
+	var exists int
+	if err := r.Pool.QueryRow(ctx, checkSQL, checkArgs...).Scan(&exists); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, repoerrs.ErrNotFound
+		}
+		return 0, fmt.Errorf("failed to check team existence: %w", err)
+	}
+
+	sql, args, _ := r.Builder.
+		Update("users").
+		Set("is_active", active).
+		Where(squirrel.Eq{"team_name": teamName}).
+		Where("is_active != ?", active).
+		ToSql()
+
+	cmd, err := r.Pool.Exec(ctx, sql, args...)
+	if err != nil {
+		return 0, fmt.Errorf("failed to send batch: %w", err)
+	}
+
+	return cmd.RowsAffected(), nil
 }

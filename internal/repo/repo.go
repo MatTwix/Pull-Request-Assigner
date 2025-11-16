@@ -13,7 +13,6 @@ type User interface {
 	GetUserByID(ctx context.Context, userID string) (*models.User, error)
 	GetActiveUsersByTeam(ctx context.Context, teamName string) ([]models.User, error)
 	GetReviewPRsByUserID(ctx context.Context, userID string) ([]models.PullRequest, error)
-	SetIsActiveTeam(ctx context.Context, teamName string, isActive bool) (int64, error)
 }
 
 type PullRequest interface {
@@ -25,6 +24,7 @@ type PullRequest interface {
 type Team interface {
 	CreateTeam(ctx context.Context, team models.Team) (*models.Team, error)
 	GetTeamByName(ctx context.Context, name string) (*models.Team, error)
+	SetIsActiveTeam(ctx context.Context, teamName string, isActive bool) (int64, error)
 }
 
 type Repositories struct {
