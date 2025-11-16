@@ -80,7 +80,7 @@ export default function () {
     check(reassignRes, {
         "reassign 200": r => r.status === 200,
     });
-    if (res.status != 200) console.log(res.status)
+    if (reassignRes.status != 200) console.log(reassignRes.status)
 
     // PR MERGE
     res = http.post(`${CONFIG.BASE_URL}/pullRequest/merge`, JSON.stringify({
@@ -89,7 +89,7 @@ export default function () {
         headers: { "Content-Type": "application/json", "X-Api-Key": CONFIG.ADMIN_API_KEY }
     });
     check(res, { "pr_merge 200": r => r.status === 200 || r.status === 400 });
-    if (res.status != 200) console.log(res.status)
+    if (res.status != 200 && res.status != 400) console.log(res.status)
 
     // USERS setIsActive
     res = http.post(`${CONFIG.BASE_URL}/users/setIsActive`, JSON.stringify({
