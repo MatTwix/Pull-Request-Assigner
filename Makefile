@@ -1,6 +1,8 @@
 include .env
 export
 
+PG_URL := postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:5432/${POSTGRES_DBNAME}
+
 compose-up: ### Run docker-compose
 	docker-compose up --build -d
 .PHONY: compose-up
@@ -24,6 +26,14 @@ linter: ### check by golangci linter
 migrate-create:  ### create new migration
 	migrate create -ext sql -dir migrations 'pr_management'
 .PHONY: migrate-create
+
+migrate-up: ### migration up
+	migrate -path migrations -database '$(PG_URL)?sslmode=disable' up
+.PHONY: migrate-up
+
+migrate-down: ### migration down
+	echo "y" | migrate -path migrations -database '$(PG_URL)?sslmode=disable' down
+.PHONY: migrate-down
 
 test: ### run k6 tests
 	$(MAKE) compose-up
