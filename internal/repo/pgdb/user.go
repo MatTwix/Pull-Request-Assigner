@@ -20,32 +20,29 @@ func NewUserRepo(pg *postgres.Postgres) *UserRepo {
 	return &UserRepo{pg}
 }
 
-func (r *UserRepo) SetIsActive(ctx context.Context, userID string, isActive bool) (*models.User, error) {
-	sql, args, _ := r.Builder.
-		Update("users").
-		Set("is_active", isActive).
-		Where("user_id = ?", userID).
-		Suffix("RETURNING id, username, team_name").
-		ToSql()
-
-	user := models.User{
-		UserID:   userID,
-		IsActive: isActive,
-	}
-	err := r.Pool.QueryRow(ctx, sql, args...).Scan(
-		&user.ID,
-		&user.Username,
-		&user.TeamName,
-	)
-
+func (r *UserRepo) SetIsActive(ctx context.Context, userID string, isActive bool) (userRes *models.User, alreadyUpdated bool, err error) {
+	user, err := r.GetUserByID(ctx, userID)
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, repoerrs.ErrNotFound
-		}
-		return nil, fmt.Errorf("failed to execute sql request: %w", err)
+		return nil, false, err
 	}
 
-	return &user, nil
+	alreadyUpdated = user.IsActive == isActive
+
+	if !alreadyUpdated {
+		sql, args, _ := r.Builder.
+			Update("users").
+			Set("is_active", isActive).
+			Where("user_id = ?", userID).
+			ToSql()
+
+		if _, err = r.Pool.Exec(ctx, sql, args...); err != nil {
+			return nil, false, fmt.Errorf("failed to execute sql request: %w", err)
+		}
+
+		user.IsActive = isActive
+	}
+
+	return user, alreadyUpdated, nil
 }
 
 func (r *UserRepo) GetUserByID(ctx context.Context, userID string) (*models.User, error) {

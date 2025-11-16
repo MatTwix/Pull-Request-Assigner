@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+
+	"github.com/MatTwix/Pull-Request-Assigner/internal/metrics"
 )
 
 const (
@@ -47,6 +49,10 @@ func newErrorResponse(w http.ResponseWriter, status int, code, msg string) {
 			Code:    code,
 			Message: msg,
 		},
+	}
+
+	if code != CodeInternalServerError {
+		metrics.BusinessErrors.WithLabelValues(code).Inc()
 	}
 
 	_ = json.NewEncoder(w).Encode(resp)

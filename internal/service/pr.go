@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/MatTwix/Pull-Request-Assigner/internal/metrics"
 	"github.com/MatTwix/Pull-Request-Assigner/internal/models"
 	"github.com/MatTwix/Pull-Request-Assigner/internal/repo"
 )
@@ -38,11 +39,12 @@ func (s *PullRequestService) CreatePR(ctx context.Context, input PullRequestCrea
 
 	output := PullRequestCreateOutput{PullRequest: outputPR}
 
+	metrics.PRCreated.Inc()
 	return &output, nil
 }
 
 func (s *PullRequestService) MergePR(ctx context.Context, prID string) (*PullRequestMergeOutput, error) {
-	pullRequest, err := s.pullRequestRepo.MergePR(ctx, prID)
+	pullRequest, alreadyMerged, err := s.pullRequestRepo.MergePR(ctx, prID)
 	if err != nil {
 		return nil, err
 	}
@@ -58,6 +60,9 @@ func (s *PullRequestService) MergePR(ctx context.Context, prID string) (*PullReq
 
 	output := PullRequestMergeOutput{PullRequest: outputPR}
 
+	if !alreadyMerged {
+		metrics.PRMerged.Inc()
+	}
 	return &output, nil
 }
 

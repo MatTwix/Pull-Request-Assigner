@@ -8,9 +8,16 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
+const metricsRoutePath = "/metrics"
+
 func loggingMiddleware(log logger.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == metricsRoutePath {
+				next.ServeHTTP(w, r)
+				return
+			}
+
 			ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 
 			start := time.Now()

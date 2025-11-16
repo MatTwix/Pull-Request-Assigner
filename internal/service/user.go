@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/MatTwix/Pull-Request-Assigner/internal/metrics"
 	"github.com/MatTwix/Pull-Request-Assigner/internal/repo"
 )
 
@@ -15,7 +16,7 @@ func NewUserService(userRepo repo.User) *UserService {
 }
 
 func (s *UserService) SetIsActive(ctx context.Context, userID string, isActive bool) (*UserSetIsActiveOutput, error) {
-	user, err := s.userRepo.SetIsActive(ctx, userID, isActive)
+	user, alreadyUpdated, err := s.userRepo.SetIsActive(ctx, userID, isActive)
 	if err != nil {
 		return nil, err
 	}
@@ -28,6 +29,10 @@ func (s *UserService) SetIsActive(ctx context.Context, userID string, isActive b
 	}
 
 	output := UserSetIsActiveOutput{User: outputUser}
+
+	if !alreadyUpdated {
+		metrics.UserStatusChanges.WithLabelValues("setIsActive").Inc()
+	}
 
 	return &output, nil
 }
@@ -59,5 +64,6 @@ func (s *UserService) SetIsActiveBatch(ctx context.Context, userIDs []string, is
 
 	output := UserSetIsActiveBatchOutput{UsersUpdated: usersUpdated}
 
+	metrics.UserStatusChanges.WithLabelValues("setIsActiveBatch").Add(float64(usersUpdated))
 	return &output, nil
 }

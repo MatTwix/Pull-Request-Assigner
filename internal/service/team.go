@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/MatTwix/Pull-Request-Assigner/internal/metrics"
 	"github.com/MatTwix/Pull-Request-Assigner/internal/models"
 	"github.com/MatTwix/Pull-Request-Assigner/internal/repo"
 )
@@ -44,6 +45,9 @@ func (s *TeamService) AddTeam(ctx context.Context, input TeamAddInput) (*TeamAdd
 	}
 
 	output := TeamAddOutput{Team: outputTeam}
+
+	metrics.TeamsCreated.Inc()
+	metrics.UsersCreated.Add(float64(len(createdTeam.Members)))
 
 	return &output, nil
 }

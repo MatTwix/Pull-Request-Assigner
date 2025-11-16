@@ -62,10 +62,6 @@ func (r *PullRequestRepo) CreatePR(ctx context.Context, pr models.PullRequest) (
 		pr.AssignedReviewers = append(pr.AssignedReviewers, reviewerID)
 	}
 
-	if len(pr.AssignedReviewers) == 0 {
-		return nil, repoerrs.ErrNotFound
-	}
-
 	checkSQL, checkArgs, _ := r.Builder.
 		Select("1").
 		From("pull_requests").
@@ -130,10 +126,10 @@ func (r *PullRequestRepo) CreatePR(ctx context.Context, pr models.PullRequest) (
 	return &pr, nil
 }
 
-func (r *PullRequestRepo) MergePR(ctx context.Context, prID string) (*models.PullRequest, error) {
+func (r *PullRequestRepo) MergePR(ctx context.Context, prID string) (prRes *models.PullRequest, alreadyMerged bool, err error) {
 	tx, err := r.Pool.Begin(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to start transaction: %w", err)
+		return nil, false, fmt.Errorf("failed to start transaction: %w", err)
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
@@ -146,25 +142,25 @@ func (r *PullRequestRepo) MergePR(ctx context.Context, prID string) (*models.Pul
 
 	if err := tx.QueryRow(ctx, sql, args...).Scan(&prevStatus); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, repoerrs.ErrNotFound
+			return nil, false, repoerrs.ErrNotFound
 		}
-		return nil, fmt.Errorf("failed to check pr status: %w", err)
+		return nil, false, fmt.Errorf("failed to check pr status: %w", err)
 	}
 
-	sql, args, _ = r.Builder.
-		Update("pull_requests").
-		Set("status", "MERGED").
-		Set("merged_at", squirrel.Expr("COALESCE(merged_at, NOW())")).
-		Where(squirrel.Eq{"pull_request_id": prID}).
-		ToSql()
+	alreadyMerged = prevStatus == MergedStatus
 
-	cmdTag, err := tx.Exec(ctx, sql, args...)
-	if err != nil {
-		return nil, fmt.Errorf("failed to exec row: %w", err)
-	}
+	if !alreadyMerged {
+		sql, args, _ = r.Builder.
+			Update("pull_requests").
+			Set("status", "MERGED").
+			Set("merged_at", squirrel.Expr("NOW()")).
+			Where(squirrel.Eq{"pull_request_id": prID}).
+			ToSql()
 
-	if cmdTag.RowsAffected() == 0 {
-		return nil, repoerrs.ErrNotFound
+		_, err = tx.Exec(ctx, sql, args...)
+		if err != nil {
+			return nil, false, fmt.Errorf("failed to exec row: %w", err)
+		}
 	}
 
 	var reviewerIDs []string
@@ -176,7 +172,7 @@ func (r *PullRequestRepo) MergePR(ctx context.Context, prID string) (*models.Pul
 
 	rows, err := tx.Query(ctx, sql, args...)
 	if err != nil {
-		return nil, fmt.Errorf("failed to select reviewers: %w", err)
+		return nil, false, fmt.Errorf("failed to select reviewers: %w", err)
 	}
 	defer rows.Close()
 
@@ -184,7 +180,7 @@ func (r *PullRequestRepo) MergePR(ctx context.Context, prID string) (*models.Pul
 		var reviewerID string
 
 		if err := rows.Scan(&reviewerID); err != nil {
-			return nil, fmt.Errorf("failed to scan reviewer id: %w", err)
+			return nil, false, fmt.Errorf("failed to scan reviewer id: %w", err)
 		}
 
 		reviewerIDs = append(reviewerIDs, reviewerID)
@@ -210,10 +206,10 @@ func (r *PullRequestRepo) MergePR(ctx context.Context, prID string) (*models.Pul
 	)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to get updated pr: %w", err)
+		return nil, false, fmt.Errorf("failed to get updated pr: %w", err)
 	}
 
-	if len(reviewerIDs) > 0 && prevStatus != MergedStatus {
+	if len(reviewerIDs) > 0 && !alreadyMerged {
 		sql, args, _ := r.Builder.
 			Update("users").
 			Set("is_active", true).
@@ -221,15 +217,15 @@ func (r *PullRequestRepo) MergePR(ctx context.Context, prID string) (*models.Pul
 			ToSql()
 
 		if _, err := tx.Exec(ctx, sql, args...); err != nil {
-			return nil, fmt.Errorf("failed to make reviewers active: %w", err)
+			return nil, false, fmt.Errorf("failed to make reviewers active: %w", err)
 		}
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		return nil, fmt.Errorf("failed to commit transaction: %w", err)
+		return nil, false, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
-	return &pr, nil
+	return &pr, alreadyMerged, nil
 }
 
 func (r *PullRequestRepo) ReassignReviewer(ctx context.Context, prID, oldUserID string) (pullRequest *models.PullRequest, replacedBy string, err error) {

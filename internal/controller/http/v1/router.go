@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	_ "github.com/MatTwix/Pull-Request-Assigner/docs"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"github.com/MatTwix/Pull-Request-Assigner/internal/service"
 	"github.com/MatTwix/Pull-Request-Assigner/pkg/logger"
@@ -17,6 +18,8 @@ func NewRouter(r *chi.Mux, services *service.Services, logger logger.Logger) {
 
 	r.Use(middleware.Recoverer)
 	r.Use(loggingMiddleware(logger))
+
+	r.Handle("/metrics", promhttp.Handler())
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
