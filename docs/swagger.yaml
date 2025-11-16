@@ -118,11 +118,6 @@ definitions:
       status:
         type: string
     type: object
-  github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveBatchOutput:
-    properties:
-      users_updated:
-        type: integer
-    type: object
   github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveOutput:
     properties:
       user:
@@ -138,6 +133,11 @@ definitions:
         type: string
       username:
         type: string
+    type: object
+  github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveTeamOutput:
+    properties:
+      users_updated:
+        type: integer
     type: object
   internal_controller_http_v1.ErrorBody:
     properties:
@@ -176,14 +176,12 @@ definitions:
     - pull_request_id
     - pull_request_name
     type: object
-  internal_controller_http_v1.deactivateBatchRequest:
+  internal_controller_http_v1.deactivateTeamRequest:
     properties:
-      user_ids:
-        items:
-          type: string
-        type: array
+      team_name:
+        type: string
     required:
-    - user_ids
+    - team_name
     type: object
   internal_controller_http_v1.mergePRRequest:
     properties:
@@ -432,34 +430,38 @@ paths:
       summary: Получить команду с участниками
       tags:
       - Teams
-  /users/deactivateBatch:
+  /users/deactivateTeam:
     post:
       consumes:
       - application/json
-      description: Быстрый метод для массовой деактивации пользователей
+      description: Быстрый метод для массовой деактивации членов определенной команды
       parameters:
-      - description: User to deactivate user_id's list
+      - description: Team to deactivate name
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_controller_http_v1.deactivateBatchRequest'
+          $ref: '#/definitions/internal_controller_http_v1.deactivateTeamRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveBatchOutput'
+            $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveTeamOutput'
         "400":
           description: Неверное тело запроса
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "404":
+          description: Команда не найдена
           schema:
             $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
         "500":
           description: Внутренняя ошибка сервера
           schema:
             $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
-      summary: Массовая деактивация пользователей
+      summary: Деактивация всех членов команды
       tags:
       - Users
   /users/getReview:

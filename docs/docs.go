@@ -331,9 +331,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/deactivateBatch": {
+        "/users/deactivateTeam": {
             "post": {
-                "description": "Быстрый метод для массовой деактивации пользователей",
+                "description": "Быстрый метод для массовой деактивации членов определенной команды",
                 "consumes": [
                     "application/json"
                 ],
@@ -343,15 +343,15 @@ const docTemplate = `{
                 "tags": [
                     "Users"
                 ],
-                "summary": "Массовая деактивация пользователей",
+                "summary": "Деактивация всех членов команды",
                 "parameters": [
                     {
-                        "description": "User to deactivate user_id's list",
+                        "description": "Team to deactivate name",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/internal_controller_http_v1.deactivateBatchRequest"
+                            "$ref": "#/definitions/internal_controller_http_v1.deactivateTeamRequest"
                         }
                     }
                 ],
@@ -359,11 +359,17 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveBatchOutput"
+                            "$ref": "#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveTeamOutput"
                         }
                     },
                     "400": {
                         "description": "Неверное тело запроса",
+                        "schema": {
+                            "$ref": "#/definitions/internal_controller_http_v1.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Команда не найдена",
                         "schema": {
                             "$ref": "#/definitions/internal_controller_http_v1.ErrorResponse"
                         }
@@ -680,14 +686,6 @@ const docTemplate = `{
                 }
             }
         },
-        "github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveBatchOutput": {
-            "type": "object",
-            "properties": {
-                "users_updated": {
-                    "type": "integer"
-                }
-            }
-        },
         "github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveOutput": {
             "type": "object",
             "properties": {
@@ -710,6 +708,14 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveTeamOutput": {
+            "type": "object",
+            "properties": {
+                "users_updated": {
+                    "type": "integer"
                 }
             }
         },
@@ -769,17 +775,14 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_controller_http_v1.deactivateBatchRequest": {
+        "internal_controller_http_v1.deactivateTeamRequest": {
             "type": "object",
             "required": [
-                "user_ids"
+                "team_name"
             ],
             "properties": {
-                "user_ids": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                "team_name": {
+                    "type": "string"
                 }
             }
         },

@@ -71,14 +71,14 @@ type UserRevieeOutputPR struct {
 	Status          string `json:"status"`
 }
 
-type UserSetIsActiveBatchOutput struct {
+type UserSetIsActiveTeamOutput struct {
 	UsersUpdated int64 `json:"users_updated"`
 }
 
 type User interface {
 	SetIsActive(ctx context.Context, userID string, isActive bool) (*UserSetIsActiveOutput, error)
 	GetReview(ctx context.Context, userID string) (*UserGetReviewOutput, error)
-	SetIsActiveBatch(ctx context.Context, userIDs []string, isActive bool) (*UserSetIsActiveBatchOutput, error)
+	SetIsActiveTeam(ctx context.Context, teamName string, isActive bool) (*UserSetIsActiveTeamOutput, error)
 }
 
 type PullRequestCreateInput struct {

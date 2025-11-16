@@ -56,14 +56,14 @@ func (s *UserService) GetReview(ctx context.Context, userID string) (*UserGetRev
 	return &output, nil
 }
 
-func (s *UserService) SetIsActiveBatch(ctx context.Context, userIDs []string, isActive bool) (*UserSetIsActiveBatchOutput, error) {
-	usersUpdated, err := s.userRepo.SetIsActiveBatch(ctx, userIDs, isActive)
+func (s *UserService) SetIsActiveTeam(ctx context.Context, teamName string, isActive bool) (*UserSetIsActiveTeamOutput, error) {
+	usersUpdated, err := s.userRepo.SetIsActiveTeam(ctx, teamName, isActive)
 	if err != nil {
 		return nil, err
 	}
 
-	output := UserSetIsActiveBatchOutput{UsersUpdated: usersUpdated}
+	output := UserSetIsActiveTeamOutput{UsersUpdated: usersUpdated}
 
-	metrics.UserStatusChanges.WithLabelValues("setIsActiveBatch").Add(float64(usersUpdated))
+	metrics.UserStatusChanges.WithLabelValues("setIsActiveTeam").Add(float64(usersUpdated))
 	return &output, nil
 }

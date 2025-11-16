@@ -13,7 +13,7 @@ type User interface {
 	GetUserByID(ctx context.Context, userID string) (*models.User, error)
 	GetActiveUsersByTeam(ctx context.Context, teamName string) ([]models.User, error)
 	GetReviewPRsByUserID(ctx context.Context, userID string) ([]models.PullRequest, error)
-	SetIsActiveBatch(ctx context.Context, userIDs []string, isActive bool) (int64, error)
+	SetIsActiveTeam(ctx context.Context, teamName string, isActive bool) (int64, error)
 }
 
 type PullRequest interface {
