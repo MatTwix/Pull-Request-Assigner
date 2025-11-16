@@ -10,18 +10,6 @@ export const options = {
 export default function () {
   let now = Date.now()
 
-  for (let i = 1; i <= 4; i++) {
-    const res = http.post(`${CONFIG.BASE_URL}/users/setIsActive`,
-      JSON.stringify({
-        user_id: `test_pr_user${i}${__VU}_${now}`,
-        is_active: true
-      }),
-      {
-        headers: { "Content-Type": "application/json", "X-Api-Key": CONFIG.ADMIN_API_KEY }
-      }
-    );
-  }
-
   const payload = JSON.stringify({
     team_name: `test_team${__VU}_${now}`,
     members: [
@@ -31,7 +19,7 @@ export default function () {
       { user_id: `test_pr_user4${__VU}_${now}`, username: "user", is_active: true }
     ]
   });
-
+  
   let res = http.post(`${CONFIG.BASE_URL}/team/add`, payload);
 
   const createRes = http.post(
