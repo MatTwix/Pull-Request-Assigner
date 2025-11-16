@@ -18,7 +18,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -51,6 +50,9 @@
       },
       "id": 6,
       "options": {
+        "displayLabels": [
+          "value"
+        ],
         "legend": {
           "displayMode": "list",
           "placement": "bottom",
@@ -229,7 +231,8 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "fixedColor": "super-light-green",
+            "mode": "fixed"
           },
           "mappings": [],
           "thresholds": {
@@ -856,6 +859,6 @@
   "timezone": "",
   "title": "Business Dashboard",
   "uid": "f9d0ff01-2abe-4e11-bca9-4a3f1223bc85",
-  "version": 5,
+  "version": 1,
   "weekStart": ""
 }
