@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/MatTwix/Pull-Request-Assigner/internal/models"
 	"github.com/MatTwix/Pull-Request-Assigner/internal/repo/repoerrs"
 	"github.com/MatTwix/Pull-Request-Assigner/pkg/database/postgres"
@@ -143,4 +144,20 @@ func (r *UserRepo) GetReviewPRsByUserID(ctx context.Context, userID string) ([]m
 	}
 
 	return pullRequests, nil
+}
+
+func (r *UserRepo) SetIsActiveBatch(ctx context.Context, userIDs []string, active bool) (int64, error) {
+	sql, args, _ := r.Builder.
+		Update("users").
+		Set("is_active", active).
+		Where(squirrel.Eq{"user_id": userIDs}).
+		Where("is_active != ?", active).
+		ToSql()
+
+	cmd, err := r.Pool.Exec(ctx, sql, args...)
+	if err != nil {
+		return 0, fmt.Errorf("failed to send batch: %w", err)
+	}
+
+	return cmd.RowsAffected(), nil
 }

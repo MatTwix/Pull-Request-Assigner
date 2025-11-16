@@ -41,6 +41,9 @@ func NewRouter(r *chi.Mux, services *service.Services, logger logger.Logger) {
 
 		rt.With(authMiddleware.APIKeyMiddleware(false)).
 			Get("/getReview", user.getReview)
+
+		rt.With(authMiddleware.APIKeyMiddleware(true)).
+			Post("/deactivateBatch", user.deactivateBatch)
 	})
 
 	r.Route("/pullRequest", func(rt chi.Router) {

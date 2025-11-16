@@ -105,3 +105,43 @@ func (ur *userRoutes) getReview(w http.ResponseWriter, r *http.Request) {
 
 	newSuccessResponse(w, http.StatusOK, pullRequests)
 }
+
+type deactivateBatchRequest struct {
+	UserIDs []string `json:"user_ids" validate:"required"`
+}
+
+// @Summary Массовая деактивация пользователей
+// @Description Быстрый метод для массовой деактивации пользователей
+// @Tags Users
+// @Accept json
+// @Produce json
+// @Param request body deactivateBatchRequest true "User to deactivate user_id's list"
+// @Success 200 {object} service.UserSetIsActiveBatchOutput
+// @Failure 400 {object} ErrorResponse "Неверное тело запроса"
+// @Failure 500 {object} ErrorResponse "Внутренняя ошибка сервера"
+// @Router /users/deactivateBatch [post]
+func (ur *userRoutes) deactivateBatch(w http.ResponseWriter, r *http.Request) {
+	var req deactivateBatchRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		newErrorResponse(w, http.StatusBadRequest, CodeBadRequest, "invalid request body")
+		return
+	}
+
+	if err := utils.ValidateStruct(req); err != nil || len(req.UserIDs) == 0 {
+		newErrorResponse(w, http.StatusBadRequest, CodeBadRequest, "invalid request body")
+		return
+	}
+
+	usersDeactivated, err := ur.userService.SetIsActiveBatch(r.Context(), req.UserIDs, false)
+	if err != nil {
+		newErrorResponse(w, http.StatusInternalServerError, CodeInternalServerError, "failed to deactivate users")
+		ur.logger.Error("failed to deactivate users", map[string]any{
+			"user_ids_amount": len(req.UserIDs),
+			"error":           err,
+		})
+		return
+	}
+
+	newSuccessResponse(w, http.StatusOK, usersDeactivated)
+}

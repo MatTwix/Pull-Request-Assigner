@@ -331,6 +331,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/deactivateBatch": {
+            "post": {
+                "description": "Быстрый метод для массовой деактивации пользователей",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Массовая деактивация пользователей",
+                "parameters": [
+                    {
+                        "description": "User to deactivate user_id's list",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_controller_http_v1.deactivateBatchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveBatchOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Неверное тело запроса",
+                        "schema": {
+                            "$ref": "#/definitions/internal_controller_http_v1.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Внутренняя ошибка сервера",
+                        "schema": {
+                            "$ref": "#/definitions/internal_controller_http_v1.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/getReview": {
             "get": {
                 "security": [
@@ -634,6 +680,14 @@ const docTemplate = `{
                 }
             }
         },
+        "github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveBatchOutput": {
+            "type": "object",
+            "properties": {
+                "users_updated": {
+                    "type": "integer"
+                }
+            }
+        },
         "github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveOutput": {
             "type": "object",
             "properties": {
@@ -712,6 +766,20 @@ const docTemplate = `{
                 },
                 "pull_request_name": {
                     "type": "string"
+                }
+            }
+        },
+        "internal_controller_http_v1.deactivateBatchRequest": {
+            "type": "object",
+            "required": [
+                "user_ids"
+            ],
+            "properties": {
+                "user_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },

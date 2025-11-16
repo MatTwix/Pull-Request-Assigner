@@ -50,3 +50,14 @@ func (s *UserService) GetReview(ctx context.Context, userID string) (*UserGetRev
 
 	return &output, nil
 }
+
+func (s *UserService) SetIsActiveBatch(ctx context.Context, userIDs []string, isActive bool) (*UserSetIsActiveBatchOutput, error) {
+	usersUpdated, err := s.userRepo.SetIsActiveBatch(ctx, userIDs, isActive)
+	if err != nil {
+		return nil, err
+	}
+
+	output := UserSetIsActiveBatchOutput{UsersUpdated: usersUpdated}
+
+	return &output, nil
+}

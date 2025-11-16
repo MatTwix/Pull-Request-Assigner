@@ -118,6 +118,11 @@ definitions:
       status:
         type: string
     type: object
+  github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveBatchOutput:
+    properties:
+      users_updated:
+        type: integer
+    type: object
   github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveOutput:
     properties:
       user:
@@ -170,6 +175,15 @@ definitions:
     - author_id
     - pull_request_id
     - pull_request_name
+    type: object
+  internal_controller_http_v1.deactivateBatchRequest:
+    properties:
+      user_ids:
+        items:
+          type: string
+        type: array
+    required:
+    - user_ids
     type: object
   internal_controller_http_v1.mergePRRequest:
     properties:
@@ -418,6 +432,36 @@ paths:
       summary: Получить команду с участниками
       tags:
       - Teams
+  /users/deactivateBatch:
+    post:
+      consumes:
+      - application/json
+      description: Быстрый метод для массовой деактивации пользователей
+      parameters:
+      - description: User to deactivate user_id's list
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_controller_http_v1.deactivateBatchRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/github_com_MatTwix_Pull-Request-Assigner_internal_service.UserSetIsActiveBatchOutput'
+        "400":
+          description: Неверное тело запроса
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/internal_controller_http_v1.ErrorResponse'
+      summary: Массовая деактивация пользователей
+      tags:
+      - Users
   /users/getReview:
     get:
       consumes:
